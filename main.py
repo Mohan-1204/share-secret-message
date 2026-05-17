@@ -71,6 +71,14 @@ def lsb_encode(image_path, secret_text, key):
     if img is None:
         raise ValueError("Image reading failed. Check the file path.")
 
+    # RE-SIZE OPTIMIZATION: Prevent Worker Timeout on Render
+    # Large images take too long to encode into PNGs and encrypt, causing a 500 timeout.
+    h, w = img.shape[:2]
+    max_dim = 800
+    if max(h, w) > max_dim:
+        scale = max_dim / max(h, w)
+        img = cv2.resize(img, (int(w * scale), int(h * scale)))
+
     # Convert image to 1D array for faster bit manipulation
     flattened = img.flatten()
 
