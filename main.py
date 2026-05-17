@@ -236,62 +236,79 @@ def upload():
     cursor = db.cursor()
 
     if request.method == 'POST':
-        receiver_id = request.form.get('receiver_id')
-        secret_text = request.form.get('secret_text')
-        cover_img = request.files.get('cover_image')
+        try:
+            receiver_id = request.form.get('receiver_id')
+            secret_text = request.form.get('secret_text')
+            cover_img = request.files.get('cover_image')
 
-        # Generate secure keys automatically
-        lsb_key = secrets.token_hex(8)
-        ecc_key = secrets.token_hex(8)
+            # Generate secure keys automatically
+            lsb_key = secrets.token_hex(8)
+            ecc_key = secrets.token_hex(8)
 
-        if cover_img:
-            filename = cover_img.filename
-            temp_path = os.path.join('static/uploads/originals', 'temp_' + filename)
-            cover_img.save(temp_path)
+            if cover_img:
+                from werkzeug.utils import secure_filename
+                filename = secure_filename(cover_img.filename)
+                if not filename:
+                    filename = "default_image.png"
+                temp_path = os.path.join('static/uploads/originals', 'temp_' + filename)
 
-            try:
-                # A. LSB Encoding
-                stego_path, stego_filename = lsb_encode(temp_path, secret_text, lsb_key)
-
-                # B. Split & Encrypt
-                split_and_encrypt(stego_path, ecc_key)
-
-                # C. Get receiver details
-                cursor.execute("SELECT email, name FROM users WHERE id = ?", (receiver_id,))
-                receiver_data = cursor.fetchone()
-
-                # D. Insert into Database
-                sql = """INSERT INTO shared_files 
-                         (sender_id, receiver_id, file_name, lsb_key, ecc_key, status,secret_text) 
-                         VALUES (?, ?, ?, ?, ?, ?, ?)"""
-                cursor.execute(sql, (session['user_id'], receiver_id, stego_filename, lsb_key, ecc_key, 'Sent',secret_text))
-                db.commit()
-
-                # E. Send Email via Yagmail
                 try:
-                    yag = yagmail.SMTP(SENDER_EMAIL, SENDER_PASSWORD)
-                    yag.send(
-                        to=receiver_data['email'],
-                        subject="Secure File Received - Decryption Keys",
-                        contents=[
-                            f"Hi {receiver_data['name']},",
-                            f"User {session['username']} has sent you a secure file.",
-                            f"1. ECC Key (Image Reconstruction): {ecc_key}",
-                            f"2. LSB Key (Text Extraction): {lsb_key}"
-                        ]
-                    )
-                    email_status = "Keys sent to email."
-                except Exception as mail_err:
-                    email_status = f"Warning: File processed but email failed: {mail_err}"
+                    cover_img.save(temp_path)
 
-                os.remove(temp_path)
-                db.close()  # Close before redirecting
-                flash(f"Success! {email_status}")
-                return redirect(url_for('userhome'))
+                    # A. LSB Encoding
+                    stego_path, stego_filename = lsb_encode(temp_path, secret_text, lsb_key)
 
-            except Exception as e:
-                db.rollback()
-                flash(f"Error in processing: {str(e)}")
+                    # B. Split & Encrypt
+                    split_and_encrypt(stego_path, ecc_key)
+
+                    # C. Get receiver details
+                    cursor.execute("SELECT email, name FROM users WHERE id = ?", (receiver_id,))
+                    receiver_data = cursor.fetchone()
+
+                    # D. Insert into Database
+                    sql = """INSERT INTO shared_files 
+                             (sender_id, receiver_id, file_name, lsb_key, ecc_key, status,secret_text) 
+                             VALUES (?, ?, ?, ?, ?, ?, ?)"""
+                    cursor.execute(sql, (session['user_id'], receiver_id, stego_filename, lsb_key, ecc_key, 'Sent',secret_text))
+                    db.commit()
+
+                    # E. Send Email via Yagmail
+                    try:
+                        yag = yagmail.SMTP(SENDER_EMAIL, SENDER_PASSWORD)
+                        yag.send(
+                            to=receiver_data['email'],
+                            subject="Secure File Received - Decryption Keys",
+                            contents=[
+                                f"Hi {receiver_data['name']},",
+                                f"User {session['username']} has sent you a secure file.",
+                                f"1. ECC Key (Image Reconstruction): {ecc_key}",
+                                f"2. LSB Key (Text Extraction): {lsb_key}"
+                            ]
+                        )
+                        email_status = "Keys sent to email."
+                    except Exception as mail_err:
+                        email_status = f"Warning: File processed but email failed: {mail_err}"
+
+                    if os.path.exists(temp_path):
+                        os.remove(temp_path)
+                        
+                    db.close()  # Close before redirecting
+                    flash(f"Success! {email_status}")
+                    return redirect(url_for('userhome'))
+
+                except Exception as e:
+                    db.rollback()
+                    if os.path.exists(temp_path):
+                        try:
+                            os.remove(temp_path)
+                        except:
+                            pass
+                    flash(f"Error in processing: {str(e)}")
+                    
+        except Exception as global_e:
+            import traceback
+            error_details = traceback.format_exc()
+            return f"<h1>Global Error in Upload POST:</h1><pre>{error_details}</pre>", 500
 
     # 2. Intha part GET request-kum work aagum, POST fail aana thirumba form-kum pogum
     cursor.execute("SELECT id, name, email FROM users WHERE id != ?", (session['user_id'],))
