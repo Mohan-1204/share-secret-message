@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+env/
+database.db
+static/uploads/originals/*
+static/uploads/encrypted/*
+!static/uploads/originals/.keep
+!static/uploads/encrypted/.keep
+.env

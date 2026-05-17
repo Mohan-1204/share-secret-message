@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure-Stego | Advanced Data Hiding & ECC Security</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root { --industro-orange: #ff5e14; --industro-navy: #001d3d; }
+        body { font-family: 'Roboto', sans-serif; }
+
+        /* Navbar */
+        .navbar { background-color: white; border-bottom: 3px solid var(--industro-orange); }
+        .nav-link { color: var(--industro-navy) !important; font-weight: 700; text-transform: uppercase; }
+        .btn-orange { background-color: var(--industro-orange); color: white; font-weight: bold; border-radius: 0; }
+
+        /* Hero */
+        .hero {
+            background: linear-gradient(to right, rgba(0, 29, 61, 0.9), rgba(0, 29, 61, 0.5)),
+                        url('https://cdn.pixabay.com/photo/2016/11/19/18/12/coding-1840003_1280.jpg'); /* New Image: Binary Coding/Encryption abstract */
+            background-size: cover;
+            padding: 150px 0;
+            color: white;
+        }
+        .hero h1 { font-size: 4rem; font-weight: 900; line-height: 1.1; }
+
+        /* Stats Section */
+        .stats-section { background-color: var(--industro-navy); color: white; padding: 60px 0; }
+        .stat-box h2 { color: var(--industro-orange); font-size: 3rem; font-weight: 800; }
+
+        /* Content Section */
+        .content-img-box { position: relative; padding-bottom: 30px; text-align: center; }
+        .content-img-box img { width: 85%; border: 10px solid white; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
+        .orange-tag { background: var(--industro-orange); color: white; padding: 20px; position: absolute; bottom: 0; right: 15%; }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg sticky-top">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="#">
+                <div class="bg-orange p-2 me-2 text-white fw-bold" style="background: var(--industro-orange);">SS</div>
+                <span class="fw-bold text-navy" style="color: var(--industro-navy);">SECURE-STEGO</span>
+            </a>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="#">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#about">Project Explain</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/login">Login</a></li>
+                    <li class="nav-item"><a class="btn btn-orange ms-3" href="/register">GET STARTED</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <header class="hero">
+        <div class="container">
+            <div class="col-lg-8">
+                <h6 class="text-uppercase fw-bold mb-3" style="color: var(--industro-orange); letter-spacing: 2px;">Advanced Data Hiding</h6>
+                <h1>Secure Multi-Layer <br> Steganography Solution</h1>
+                <p class="lead my-4">Combining LSB Steganography with Elliptic Curve Cryptography (ECC) and Image Puzzling for unbreakable data sharing.</p>
+                <a href="#about" class="btn btn-orange btn-lg px-5">EXPLORE MORE</a>
+            </div>
+        </div>
+    </header>
+
+    <section class="stats-section">
+        <div class="container">
+            <div class="row text-center">
+                <div class="col-md-3 stat-box">
+                    <h2>256</h2>
+                    <p class="text-uppercase small">ECC Key Bit-Length</p>
+                </div>
+                <div class="col-md-3 stat-box">
+                    <h2>04</h2>
+                    <p class="text-uppercase small">Security Layers</p>
+                </div>
+                <div class="col-md-3 stat-box">
+                    <h2>100%</h2>
+                    <p class="text-uppercase small">Message Integrity</p>
+                </div>
+                <div class="col-md-3 stat-box">
+                    <h2>AES</h2>
+                    <p class="text-uppercase small">Puzzle Protection</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="about" class="container py-5 my-5">
+        <div class="row align-items-center">
+            <div class="col-md-6 content-img-box">
+                <img src="https://cdn.pixabay.com/photo/2016/11/19/22/52/coding-1841550_1280.jpg" alt="Visualization of Data Hiding in Pixels">
+                <div class="orange-tag text-center">
+                    <h2 class="fw-bold mb-0">ECC</h2>
+                    <p class="mb-0">Algorithm</p>
+                </div>
+            </div>
+            <div class="col-md-6 ps-md-5">
+                <h6 class="text-orange fw-bold" style="color: var(--industro-orange);">HOW IT WORKS</h6>
+                <h2 class="fw-bold mb-4" style="color: var(--industro-navy);">Advanced Data Hiding & Puzzling Mechanism</h2>
+                <p class="text-muted">Intha project-la data sharing process romba secure-ah irukum. First, sender oru text message-ah cover image-kulla hide pannuvaaru. Appo normal steganography use aagum.</p>
+
+                <ul class="list-unstyled mt-4">
+                    <li class="mb-2"><i class="fas fa-check-circle text-orange me-2" style="color: var(--industro-orange);"></i> <strong>Image Puzzles:</strong> Stego-image fragments-ah split aagum.</li>
+                    <li class="mb-2"><i class="fas fa-check-circle text-orange me-2" style="color: var(--industro-orange);"></i> <strong>ECC Security:</strong> Ovvoru puzzle-um ECC encryption moolama secure aagum.</li>
+                    <li class="mb-2"><i class="fas fa-check-circle text-orange me-2" style="color: var(--industro-orange);"></i> <strong>Two-Factor Access:</strong> Receiver login panna appo email-ku secret key varum.</li>
+                </ul>
+
+                <div class="d-flex align-items-center mt-5">
+                    <div class="bg-orange p-3 rounded-circle me-3 text-white" style="background: var(--industro-orange);"><i class="fas fa-phone"></i></div>
+                    <div>
+                        <p class="mb-0 text-muted small">Need Help?</p>
+                        <h5 class="fw-bold">+012 345 6789</h5>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="py-4 text-center border-top">
+        <p class="mb-0 text-muted">&copy; 2026 Stegano-ECC Security. All Rights Reserved.</p>
+    </footer>
+
+</body>
+</html>

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Decrypt & Verify | Secure-Stego</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <style>
+        :root { --navy: #001d3d; --orange: #ff5e14; --light-bg: #f4f7f6; }
+        body { background: var(--light-bg); font-family: 'Roboto', sans-serif; }
+
+        /* Sidebar Styles */
+        .sidebar { height: 100vh; background: var(--navy); color: white; position: fixed; width: 260px; padding-top: 20px; transition: 0.3s; z-index: 1000; }
+        .sidebar-brand { padding: 10px 25px; margin-bottom: 30px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .sidebar .nav-link { color: #adb5bd; padding: 12px 25px; font-weight: 500; border-left: 4px solid transparent; transition: 0.3s; }
+        .sidebar .nav-link:hover, .sidebar .nav-link.active { color: white; background: rgba(255,255,255,0.05); border-left: 4px solid var(--orange); }
+
+        /* Main Content */
+        .main-content { margin-left: 260px; padding: 30px; }
+
+        /* Verification Cards */
+        .verify-card { border: none; border-radius: 0; box-shadow: 0 8px 20px rgba(0,0,0,0.06); background: white; }
+        .key-input { border-radius: 0; border: 1px solid #dee2e6; padding: 12px; transition: 0.3s; }
+        .key-input:focus { border-color: var(--orange); box-shadow: none; outline: none; }
+
+        .btn-verify { background: var(--navy); color: white; border: none; padding: 12px; font-weight: bold; border-radius: 0; width: 100%; transition: 0.3s; }
+        .btn-verify:hover { background: var(--orange); color: white; }
+
+        .reconstructed-box { border: 2px dashed #ddd; background: #fafafa; padding: 15px; border-radius: 8px; }
+        .stego-img-preview { max-width: 100%; height: auto; border: 5px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+
+        .result-panel { background: #eef9f1; border-left: 5px solid #28a745; padding: 20px; margin-top: 20px; }
+
+        @media (max-width: 768px) {
+            .sidebar { margin-left: -260px; }
+            .main-content { margin-left: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="sidebar-brand text-center">
+            <h4 class="fw-bold"><i class="fas fa-shield-alt text-orange" style="color: var(--orange);"></i> SECURE-STEGO</h4>
+        </div>
+        <nav class="nav flex-column">
+            <a class="nav-link" href="/userhome"><i class="fas fa-th-large me-2"></i> Dashboard</a>
+            <a class="nav-link" href="/upload"><i class="fas fa-file-upload me-2"></i> Send Secure File</a>
+            <a class="nav-link active" href="/receiving"><i class="fas fa-file-download me-2"></i> Received Files</a>
+            <div class="mt-5 border-top border-secondary pt-3">
+                <a class="nav-link text-danger" href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </div>
+        </nav>
+    </div>
+
+    <div class="main-content">
+        <header class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
+            <div>
+                <h3 class="fw-bold text-navy mb-0">DECRYPTION PORTAL</h3>
+                <small class="text-muted">Target File: <strong>{{ file.file_name }}</strong></small>
+            </div>
+            <div>
+                <span class="badge bg-light text-dark border p-2">Session: Encrypted</span>
+            </div>
+        </header>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category if category != 'error' else 'danger' }} border-0 shadow-sm mb-4">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="row">
+            <div class="col-lg-5">
+                <div class="card verify-card p-4">
+                    <h5 class="fw-bold text-navy mb-4 border-bottom pb-2">
+                        <i class="fas fa-unlock-alt text-orange me-2"></i>Security Credentials
+                    </h5>
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label class="small fw-bold text-muted mb-2">ECC MATRIX KEY (For Image Reconstruction)</label>
+                            <input type="password" name="ecc_key" class="form-control key-input" placeholder="Enter 16-char ECC key" required>
+                        </div>
+                        <div class="mb-4">
+                            <label class="small fw-bold text-muted mb-2">LSB DATA KEY (For Text Extraction)</label>
+                            <input type="password" name="lsb_key" class="form-control key-input" placeholder="Enter 16-char LSB key" required>
+                        </div>
+                        <button type="submit" class="btn btn-verify">
+                            <i class="fas fa-cogs me-2"></i> VERIFY & RECONSTRUCT
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="col-lg-7">
+                {% if reconstructed_image %}
+                <div class="card verify-card p-4 animate__animated animate__zoomIn">
+                    <h5 class="fw-bold text-navy mb-3"><i class="fas fa-puzzle-piece text-orange me-2"></i>Reconstructed Stego Image</h5>
+                    <p class="small text-muted mb-4">The 4 fragments have been successfully merged using your ECC key.</p>
+
+                    <div class="reconstructed-box text-center mb-4">
+                        <img src="{{ url_for('static', filename='uploads/originals/' + reconstructed_image) }}"
+                             alt="Reconstructed Stego" class="stego-img-preview">
+                    </div>
+
+                    {% if secret_message %}
+                    <div class="result-panel animate__animated animate__fadeInUp">
+                        <h6 class="fw-bold text-success mb-2"><i class="fas fa-check-double me-2"></i>Hidden Message Found:</h6>
+                        <hr class="my-2">
+                        <p class="mb-0 text-dark" style="font-size: 1.1rem; letter-spacing: 0.5px;">
+                            "{{ secret_message }}"
+                        </p>
+                    </div>
+                    {% endif %}
+                </div>
+                {% else %}
+                <div class="card verify-card p-5 h-100 d-flex align-items-center justify-content-center text-center">
+                    <div>
+                        <div class="mb-4 text-light">
+                            <i class="fas fa-shield-halved fa-5x"></i>
+                        </div>
+                        <h5 class="text-muted">Waiting for Verification</h5>
+                        <p class="small text-muted px-4">The image fragments are currently split and encrypted. Enter the matching keys provided by <strong>{{ file.sender_name }}</strong> to reconstruct the data.</p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
